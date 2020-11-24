@@ -1,15 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-//#define lengthofarray(x) (sizeof((x))/sizeof((x[0])))
-#define MODE 2
-//-std=c2x
 
-int ranint(const int a, const int b)
-{
-	//Éú³É[a,b]ÖĞÒ»¸öËæ»úÕûÊı
-	return (rand() % (b - a + 1) + a);
-}
+#define MODE 2
 
 void fswap(double* a, double* b)//¶ÔÓÚ¸¡µãÊıµÄÊıÖµ½»»»
 {
@@ -73,8 +65,8 @@ void fqsort(double* input_array, const long begin, const long last)//´«ÈëÊı×éÃû£
 
 int main(void) 
 {
-	srand(time(0));
 	unsigned num;
+	srand(time(0));
 	puts("ÊäÈë´ıÅÅĞòÊı¾İµÄ¸öÊı£º");
 	scanf("%u", &num);
 	double* a = (double*)_alloca(num * sizeof(double));//ÊäÈëÊı×é
