@@ -1,33 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define lengthofarray(x) (sizeof((x))/sizeof((x[0])))
-//快排
-/*
-	验证结束前，循环{
-		取第一个数，从数组第2项开始与它比较，
-		大的就放在它后一项，否则放在前一项
-	然后从左边和右边分别执行下去
-	直到区间只剩1个数 
-	} 
-*/
-int ranint(const int a,const int b){
+//#define lengthofarray(x) (sizeof((x))/sizeof((x[0])))
+#define MODE 2
+//-std=c2x
+
+int ranint(const int a, const int b)
+{
 	//生成[a,b]中一个随机整数
-	return (rand()%(b-a+1)+a);
+	return (rand() % (b - a + 1) + a);
 }
 
-void quicksort(double *input_array, const int begin, const int last) {//迭代型快排算法
-	/*对于init数组[a元素~1+b元素]排序		↓实测是j+1
-	如对a[i]~[j]排序则要quicksort(a,i,j+1);*/
-	if (begin >= last)
+void fswap(double* a, double* b)//对于浮点数的数值交换
+{
+	double t = *a;
+	*a = *b, * b = t;
+	return;
+}
+
+//快排
+void fqsort(double* input_array, const long begin, const long last)//传入数组名，从下标begin到下标last
+{
+#if MODE == 1//旧
+	if (last <= begin)//首位相接
 		return;
-	int len = last - begin;
-	int track = begin;
-	double* big = (double*)calloc(len, sizeof(double));
-	double* small = (double*)calloc(len, sizeof(double));
+	/*double* big = (double*)calloc(len, sizeof(double));
+	double* small = (double*)calloc(len, sizeof(double));*/
+	double* big = (double*)_alloca(len, sizeof(double));
+	double* small = (double*)_alloca(len, sizeof(double));
 	int s_big = 0, s_small = 0;
 	for (int cont = begin + 1; cont < last; cont++) {//用unsigned short可能会带来溢出
-		if (input_array[cont] > input_array[begin]) {//L0
+		if (input_array[cont] > input_array[begin]) {
 			big[s_big++] = input_array[cont];//合并复制与自加
 		}
 		else {
@@ -41,30 +44,53 @@ void quicksort(double *input_array, const int begin, const int last) {//迭代型快
 	for (int cont = (1 + track), copy = 0; cont < last; cont++, copy++)
 		input_array[cont] = big[copy];
 	//	printf("begin = %d \t last = %d \t track = %d\n",begin,last,track);//debug
-	free(big);
-	free(small);
-	quicksort(input_array, begin, track);//从左边开始
-	quicksort(input_array, track + 1, last);//上一步结束，从右边开始
-	return;
+	//free(big);
+	//free(small);
+	fqsort(input_array, begin, track);//从切割位点左边开始
+	fqsort(input_array, track + 1, last);//上一步结束，从右边开始
+	const unsigned long len = last - begin;//长度
+	unsigned long track = begin;// ranint(begin, last);//随便选一个分割点
+	double temp;
+#else
+	long track = (begin + last) >> 1;//len÷2
+	long i = begin, j = last;
+	double p = input_array[track];//待比较
+	while (i <= j)//双向扫
+	{
+		while (input_array[i] < p)
+			++i;
+		while (input_array[j] > p)
+			--j;
+		if (i <= j)//防止中途就重合
+			fswap(&input_array[i++], &input_array[j--]);//交换完同时继续移动
+	}
+	if (j > begin)
+		fqsort(input_array, begin, j);//左
+	if (i < last)
+		fqsort(input_array, i, last);//右
+#endif
 }
 
-int main(void) {
-	int num;
-	printf("输入待排序数据的个数：\n");
-	scanf("%d", &num);
-	double* a = (double*)calloc(num, sizeof(double));//输入数组
-	printf("输入待排序数据：\n");
-	srand((int)time(0));
-	for(int cont = 0;cont < num; cont++){
+int main(void) 
+{
+	srand(time(0));
+	unsigned num;
+	puts("输入待排序数据的个数：");
+	scanf("%u", &num);
+	double* a = (double*)_alloca(num * sizeof(double));//输入数组
+	puts("输入待排序数据：");
+	for(int cont = 0;cont < num; cont++)
+	{
 		printf("第%d个数=", cont + 1);
 		scanf("%lf", &a[cont]);
 	}
-	quicksort(a, 0, num);
+	fqsort(a, 0, num - 1);//对整个数组排序
 	printf("\n得到结果：\n");
 	//输出结果 
-	for (int cont = 0; cont < num; cont++) {
+	for (int cont = 0; cont < num; cont++)
+	{
 		printf("%g ", a[cont]);
 	}
-	free(a);
+	//free(a);
 	return 0;
 }
